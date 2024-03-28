@@ -7,15 +7,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Tailwind generator app</title>
   </head>
-  <body class="h-full">
-    <div id="app"></div>
+  <body class="min-h-full">
+    <iframe id="generated-code" class="w-full h-full min-h-screen"></iframe>
     <div
-      class="absolute bottom-1 left-0 right-0 flex items-center justify-center"
+      class="absolute bottom-1 left-0 right-0 flex items-center justify-center bg"
     >
       <form
         id="generate-form"
         class="flex items-center max-w-md bg-gray-300 p-2 w-full gap-2 rounded shadow-md"
-        onSubmit="{handleSubmit}"
       >
         <textarea
           type="text"
