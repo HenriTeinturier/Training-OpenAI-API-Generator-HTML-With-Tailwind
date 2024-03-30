@@ -1,9 +1,14 @@
+import { ChatCompletionMessageParam } from "openai/resources/index.mjs";
 import { openai } from "./openai";
 import placeholderImg from "./placeholder-img.png";
 
 const form = document.querySelector("#generate-form") as HTMLFormElement;
 const iframe = document.getElementById("generated-code") as HTMLIFrameElement;
 const fieldset = form.querySelector("fieldset") as HTMLFieldSetElement;
+const ul = document.querySelector("#messages") as HTMLUListElement;
+const promptTextAreaElement = document.querySelector(
+  "#prompt"
+) as HTMLTextAreaElement;
 
 form.addEventListener("submit", (e) => {
   e.preventDefault();
@@ -16,12 +21,19 @@ form.addEventListener("submit", (e) => {
 
   const userPrompt = formData.get("prompt") as string;
 
-  passPromptToOpenAi(userPrompt);
+  messages.push({
+    role: "user",
+    content: userPrompt,
+  });
+
+  passPromptToOpenAi();
 
   fieldset.disabled = true;
+  promptTextAreaElement.value = "";
+  renderMessages();
 });
 
-const assistantContextFromMelvyn = `
+const SYSTEM_PROMPT = `
 
 Context:
 You are TailwindGPT, an AI text generator that writes Tailwind / HTML code.
@@ -51,7 +63,14 @@ Response format:
 - you never add "undefined" or "code" before or after the code.
 `;
 
-const passPromptToOpenAi = async (userPrompt: string) => {
+let messages: ChatCompletionMessageParam[] = [
+  {
+    role: "system",
+    content: SYSTEM_PROMPT,
+  },
+];
+
+const passPromptToOpenAi = async () => {
   const chatCompletion = await openai.chat.completions.create({
     model: "gpt-3.5-turbo",
     temperature: 1,
@@ -60,13 +79,7 @@ const passPromptToOpenAi = async (userPrompt: string) => {
     presence_penalty: 0,
     max_tokens: 256,
     stream: true,
-    messages: [
-      {
-        role: "system",
-        content: assistantContextFromMelvyn,
-      },
-      { role: "user", content: userPrompt },
-    ],
+    messages: messages,
   });
 
   let code = "";
@@ -76,12 +89,19 @@ const passPromptToOpenAi = async (userPrompt: string) => {
     const isDone = message.choices[0].finish_reason === "stop";
     const token = message.choices[0].delta.content;
 
-    if (token !== "code" && token !== "undefined" && !isDone) {
-      code += token;
-    }
     if (isDone) {
       fieldset.disabled = false;
+      // * permet de ne conserver que le dernier message de l'assitant pour éviter d'envoyer trop de tokens au prochain call de openAI.
+      messages = messages.filter((message) => message.role !== "assistant");
+      messages.push({
+        role: "assistant",
+        content: code,
+      });
       break;
+    }
+
+    if (token !== "code" && token !== "undefined" && !isDone) {
+      code += token;
     }
     onNewChunk(code);
   }
@@ -120,4 +140,22 @@ const updateIframe = (code: string) => {
       </head>
       <body>${code}</body>
     </html>`;
+};
+
+const renderMessages = () => {
+  ul.innerHTML = "";
+
+  for (const message of messages) {
+    if (message.role !== "user") {
+      continue;
+    }
+    const li = document.createElement("li");
+    const div = document.createElement("div");
+
+    li.innerText = `${message.content}`;
+    li.className = "text-gray-500 text-sm";
+    div.className = "border-t border-gray-300 my-2";
+    ul.appendChild(li);
+    ul.appendChild(div);
+  }
 };
