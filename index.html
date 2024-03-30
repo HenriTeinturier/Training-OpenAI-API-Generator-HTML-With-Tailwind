@@ -14,22 +14,24 @@
     >
       <form
         id="generate-form"
-        class="flex items-center max-w-md bg-gray-300 p-2 w-full gap-2 rounded shadow-md"
+        class="max-w-md bg-gray-300 p-2 w-full rounded shadow-md"
       >
-        <textarea
-          type="text"
-          id="prompt"
-          name="prompt"
-          class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
-          placeholder="A beautiful landing page"
-          required
-        ></textarea>
-        <button
-          type="submit"
-          class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 focus:outline-none"
-        >
-          Generate
-        </button>
+        <fieldset class="flex items-center gap-2 w-full">
+          <textarea
+            type="text"
+            id="prompt"
+            name="prompt"
+            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 disabled:bg-gray-400 disabled:cursor-not-allowed"
+            placeholder="A beautiful landing page"
+            required
+          ></textarea>
+          <button
+            type="submit"
+            class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 focus:outline-none disabled:bg-gray-500 disabled:cursor-not-allowed disabled:hover:bg-gray-500"
+          >
+            Generate
+          </button>
+        </fieldset>
       </form>
     </div>
     <script type="module" src="/src/main.ts"></script>

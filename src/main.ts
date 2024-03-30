@@ -3,14 +3,22 @@ import placeholderImg from "./placeholder-img.png";
 
 const form = document.querySelector("#generate-form") as HTMLFormElement;
 const iframe = document.getElementById("generated-code") as HTMLIFrameElement;
+const fieldset = form.querySelector("fieldset") as HTMLFieldSetElement;
 
 form.addEventListener("submit", (e) => {
   e.preventDefault();
+
+  if (fieldset.disabled) {
+    return;
+  }
+
   const formData = new FormData(form);
 
   const userPrompt = formData.get("prompt") as string;
 
   passPromptToOpenAi(userPrompt);
+
+  fieldset.disabled = true;
 });
 
 const assistantContextFromMelvyn = `
@@ -70,6 +78,10 @@ const passPromptToOpenAi = async (userPrompt: string) => {
 
     if (token !== "code" && token !== "undefined" && !isDone) {
       code += token;
+    }
+    if (isDone) {
+      fieldset.disabled = false;
+      break;
     }
     onNewChunk(code);
   }
