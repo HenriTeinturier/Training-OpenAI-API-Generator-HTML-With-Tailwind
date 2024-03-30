@@ -10,6 +10,8 @@ const promptTextAreaElement = document.querySelector(
   "#prompt"
 ) as HTMLTextAreaElement;
 
+let openaiKey = localStorage.getItem("openai-key");
+
 form.addEventListener("submit", (e) => {
   e.preventDefault();
 
@@ -20,6 +22,15 @@ form.addEventListener("submit", (e) => {
   const formData = new FormData(form);
 
   const userPrompt = formData.get("prompt") as string;
+
+  if (!openaiKey) {
+    const newOpenaiKey = window.prompt("Please enter your OpenAI API key");
+    if (!newOpenaiKey) {
+      return;
+    }
+    localStorage.setItem("openai-key", newOpenaiKey);
+    openaiKey = newOpenaiKey;
+  }
 
   messages.push({
     role: "user",
@@ -71,7 +82,7 @@ let messages: ChatCompletionMessageParam[] = [
 ];
 
 const passPromptToOpenAi = async () => {
-  const chatCompletion = await openai.chat.completions.create({
+  const chatCompletion = await openai(openaiKey).chat.completions.create({
     model: "gpt-3.5-turbo",
     temperature: 1,
     top_p: 1,
